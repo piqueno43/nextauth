@@ -1,5 +1,5 @@
 import Router from "next/router";
-import { createContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 import { setCookie, parseCookies, destroyCookie } from 'nookies'
 import { api } from "../services/apiClient";
 
@@ -22,14 +22,14 @@ type AuthContextType = {
 };
 
 type AuthProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 let authChannel: BroadcastChannel;
 
-export function signOut(){
+export function signOut() {
   destroyCookie(undefined, 'nextauth.token');
   destroyCookie(undefined, 'nextauth.refreshToken');
 
@@ -50,11 +50,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         case 'signOut':
           signOut();
           authChannel.close();
-          break;            
+          break;
         default:
           break;
-    }
-  };
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -63,11 +63,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (token) {
       api.get('me')
         .then(response => {
-        const { email, permissions, roles } = response.data;
-        setUser({ email, permissions, roles });
-      }).catch(() =>{
-        signOut();
-      })
+          const { email, permissions, roles } = response.data;
+          setUser({ email, permissions, roles });
+        }).catch(() => {
+          signOut();
+        })
     }
   }, [])
 
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         maxAge: 60 * 60 * 24 * 30, // 30 days
         path: "/",
       })
-      
+
       setUser({
         email,
         permissions,
@@ -97,15 +97,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       api.defaults.headers['Authorization'] = `Bearer ${token}`;
 
-      
-      Router.push("/dashboard");        
+
+      Router.push("/dashboard");
     } catch (err) {
       console.log(err);
     }
   }
 
   return (
-    <AuthContext.Provider value={{user, signIn, isAuthenticated, signOut}}>
+    <AuthContext.Provider value={{ user, signIn, isAuthenticated, signOut }}>
       {children}
     </AuthContext.Provider>
   );
